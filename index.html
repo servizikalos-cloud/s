@@ -1,22 +1,366 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Vapeman · Via Medeghino 39, Milano</title>
-<script>
-(function () {
-  var APP = 'https://script.google.com/macros/s/AKfycbz4Y04B4DUuM9_msWe8-5J52-VRGKX5RCsoSVQCuXDPzBoBQCYccg_Kq3XYVtEl9C6z/exec';
-  var q = location.search.replace(/^\?/, '');
-  var m = q.match(/(?:^|&)s=([^&]*)/);
-  var c = (m ? m[1] : q.split('&')[0]).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 30);
-  location.replace(APP + (c ? '?s=' + c : ''));
-})();
-</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root { --black:#231912; --cream:#FFFCEF; --orange:#EB892C; --sand:#F4D8A8; --bark:#564038; --brick:#B03D20; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--black); color: var(--cream); font-family: 'Archivo', 'Arial Black', sans-serif; }
+  .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow: hidden; }
+  .mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-weight: 600; letter-spacing: .06em; line-height: 1.35; }
+  .head { position: relative; height: 78px; overflow: hidden; background: var(--orange); }
+  .head svg { position: absolute; left: 0; top: 0; }
+  .hero { background: var(--orange); color: var(--black); padding: 6px 24px 30px; display: flex; flex-direction: column; gap: 12px; }
+  h1 { margin: 0; font-size: 38px; font-weight: 900; line-height: 1; }
+  .lead { font-size: 18px; font-weight: 500; line-height: 1.35; margin: 0; }
+  .body { padding: 24px; display: flex; flex-direction: column; gap: 30px; }
+  .card { background: var(--cream); color: var(--black); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .card .t { font-size: 30px; font-weight: 900; line-height: 1.05; }
+  .perk { background: var(--orange); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .perk b { font-size: 20px; font-weight: 900; line-height: 1.1; }
+  .staff { align-self: flex-start; min-height: 44px; padding: 0 16px; border: 2px solid var(--black); border-radius: 10px; background: var(--cream); color: var(--black); font-size: 12px; cursor: pointer; }
+  .btn { min-height: 56px; border: none; border-radius: 12px; font-family: 'Archivo', sans-serif; font-size: 18px; font-weight: 900; cursor: pointer; width: 100%; }
+  .btn.or { background: var(--orange); color: var(--black); }
+  .btn.bl { background: var(--black); color: var(--cream); }
+  h2 { margin: 0; font-size: 24px; font-weight: 900; color: var(--orange); }
+  .row { display: flex; gap: 14px; align-items: baseline; }
+  .row .n { color: var(--orange); font-size: 14px; flex: none; }
+  .row p { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.4; }
+  .dove { background: var(--bark); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .dove .ind { font-size: 24px; font-weight: 900; line-height: 1.1; }
+  .maps { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; background: var(--orange); color: var(--black); border-radius: 12px; font-size: 16px; font-weight: 900; text-decoration: none; }
+  .foot { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 30px; }
+  .pill { background: var(--orange); color: var(--black); font-size: 13px; font-weight: 900; padding: 7px 14px; border-radius: 6px; }
+  .eta { padding: 56px 24px 30px; display: flex; flex-direction: column; gap: 22px; }
+  .eta .q { font-size: 36px; font-weight: 900; line-height: 1.02; }
+  .sel { display: flex; gap: 12px; }
+  .sel label { flex: 1; display: flex; flex-direction: column; gap: 6px; color: var(--sand); font-size: 11px; }
+  select { height: 52px; border: none; border-radius: 12px; background: var(--bark); color: var(--cream); font-family: 'Archivo', sans-serif; font-size: 17px; font-weight: 500; padding: 0 14px; width: 100%; }
+  .small { font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--sand); margin: 0; }
+  .err { color: var(--sand); font-size: 15px; font-weight: 500; margin: 0; }
+  .dim { position: fixed; inset: 0; background: rgba(35,25,18,.72); }
+  .sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px; background: var(--cream); color: var(--black); border-radius: 24px 24px 0 0; padding: 28px 24px 36px; display: flex; flex-direction: column; gap: 16px; }
+  .sheet .t { font-size: 28px; font-weight: 900; line-height: 1.05; }
+  .pin { height: 56px; border: 2px solid var(--black); border-radius: 12px; padding: 0 18px; font-size: 24px; letter-spacing: .5em; width: 100%; background: var(--cream); color: var(--black); }
+  .link { min-height: 44px; border: none; background: none; color: var(--black); font-size: 13px; text-decoration: underline; cursor: pointer; }
+  .check { width: 64px; height: 64px; border-radius: 32px; background: var(--orange); display: flex; align-items: center; justify-content: center; }
+  [hidden] { display: none !important; }
+</style>
 </head>
-<body style="margin:0;background:#231912;color:#FFFCEF;font-family:Arial,sans-serif;padding:32px 24px">
-<p style="font-size:18px">Un attimo, ti portiamo alla pagina di Vapeman.</p>
-<p><a style="color:#EB892C" href="https://script.google.com/macros/s/AKfycbz4Y04B4DUuM9_msWe8-5J52-VRGKX5RCsoSVQCuXDPzBoBQCYccg_Kq3XYVtEl9C6z/exec">Apri la pagina</a></p>
+<body>
+<div class="wrap">
+  <div class="head"><svg role="img" aria-label="Vapeman" width="640" height="800" viewBox="0 0 1080 1350" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-526,-8400)">
+        <rect id="Artboard24" x="526" y="8400" width="1080" height="1350" style="fill:none;"></rect>
+        <clipPath id="_clip1">
+            <rect id="Artboard241" x="526" y="8400" width="1080" height="1350"></rect>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(0.090159,-0.053422,0.05768,0.092489,496.411331,8257.595261)">
+                <path d="M-300.863,1542.786C-338.254,1522.699 -617.194,2030.677 -582.104,2050.937L1331.46,3155.69C1366.53,3175.93 1410.12,3175.93 1445.19,3155.69L1798.12,2951.95C1833.73,2931.39 1854.99,2894.56 1854.99,2853.44C1854.99,2812.63 1834.03,2776.06 1798.89,2755.42L-300.863,1542.786Z" style="fill:rgb(235,137,44);fill-rule:nonzero;stroke:rgb(255,252,239);stroke-width:92.48px;"></path>
+            </g>
+            <g transform="matrix(-0.090159,-0.053422,-0.05768,0.092489,1692.301392,8257.595261)">
+                
+            </g>
+            <g transform="matrix(-0.053977,0.09349,-0.09349,-0.053977,722.35063,8350.150969)">
+                <path d="M1271.375,1532.107C1271.375,1532.107 2044.6,1720.92 2044.6,1679.8C2044.96,1519.43 2044.37,563.19 2044.63,426.95C2044.63,386.45 2022.84,348.7 1987.78,328.46L1609.764,94.205C1574.684,73.945 1531.094,73.945 1496.014,94.205L221.464,830.125C186.384,850.385 1271.375,1532.107 1271.375,1532.107Z" style="fill:rgb(235,137,44);fill-rule:nonzero;stroke:rgb(255,252,239);stroke-width:92.63px;"></path>
+            </g>
+            <g transform="matrix(0.319213,0,0,0.319213,723.132031,8456.511179)">
+                <g transform="matrix(83.333333,0,0,83.333333,-230.541667,0)">
+                    <path d="M0.261,-0L0.017,-0.688L0.253,-0.688L0.348,-0.37C0.351,-0.361 0.354,-0.349 0.359,-0.332C0.364,-0.315 0.369,-0.298 0.374,-0.279C0.38,-0.26 0.385,-0.243 0.389,-0.228L0.397,-0.228C0.401,-0.242 0.406,-0.258 0.411,-0.276C0.416,-0.294 0.421,-0.311 0.426,-0.329C0.431,-0.345 0.435,-0.359 0.438,-0.37L0.534,-0.688L0.76,-0.688L0.517,-0L0.261,-0Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,-169.875,0)">
+                    <path d="M0.01,-0L0.261,-0.688L0.518,-0.688L0.769,-0L0.535,-0L0.506,-0.097L0.265,-0.097L0.236,-0L0.01,-0ZM0.311,-0.251L0.461,-0.251L0.428,-0.361C0.425,-0.369 0.422,-0.379 0.419,-0.39C0.416,-0.401 0.412,-0.413 0.409,-0.426C0.406,-0.439 0.402,-0.451 0.399,-0.464C0.396,-0.476 0.393,-0.487 0.39,-0.496L0.382,-0.496C0.379,-0.484 0.376,-0.47 0.371,-0.455C0.367,-0.44 0.363,-0.424 0.358,-0.408C0.353,-0.391 0.349,-0.376 0.344,-0.361L0.311,-0.251Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,-105.041667,0)">
+                    <path d="M0.074,-0L0.074,-0.688L0.48,-0.688C0.523,-0.688 0.561,-0.678 0.595,-0.658C0.628,-0.639 0.653,-0.612 0.672,-0.577C0.691,-0.542 0.7,-0.502 0.7,-0.456C0.7,-0.409 0.691,-0.367 0.671,-0.333C0.652,-0.298 0.627,-0.27 0.594,-0.251C0.561,-0.232 0.523,-0.222 0.48,-0.222L0.295,-0.222L0.295,-0L0.074,-0ZM0.295,-0.383L0.406,-0.383C0.429,-0.383 0.447,-0.389 0.459,-0.401C0.47,-0.413 0.476,-0.431 0.476,-0.454C0.476,-0.47 0.474,-0.483 0.469,-0.493C0.464,-0.504 0.456,-0.512 0.446,-0.517C0.435,-0.522 0.422,-0.525 0.406,-0.525L0.295,-0.525L0.295,-0.383Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,-44.875,0)">
+                    <path d="M0.077,-0L0.077,-0.688L0.672,-0.688L0.672,-0.523L0.298,-0.523L0.298,-0.428L0.618,-0.428L0.618,-0.27L0.298,-0.27L0.298,-0.165L0.679,-0.165L0.679,-0L0.077,-0Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,15.291667,0)">
+                    <path d="M0.074,-0L0.074,-0.688L0.382,-0.688L0.445,-0.446C0.448,-0.437 0.452,-0.423 0.457,-0.403C0.462,-0.383 0.467,-0.361 0.473,-0.338C0.478,-0.315 0.483,-0.293 0.488,-0.273L0.496,-0.273C0.499,-0.288 0.503,-0.305 0.509,-0.326C0.514,-0.346 0.519,-0.367 0.524,-0.388C0.529,-0.409 0.534,-0.429 0.538,-0.446L0.601,-0.688L0.898,-0.688L0.898,-0L0.687,-0L0.687,-0.248C0.687,-0.275 0.687,-0.302 0.688,-0.331C0.688,-0.359 0.688,-0.386 0.689,-0.411C0.689,-0.436 0.689,-0.457 0.689,-0.474L0.681,-0.474C0.679,-0.461 0.676,-0.445 0.672,-0.427C0.669,-0.409 0.665,-0.391 0.661,-0.373C0.657,-0.356 0.653,-0.34 0.649,-0.327L0.56,-0L0.395,-0L0.305,-0.327C0.302,-0.34 0.298,-0.356 0.293,-0.373C0.289,-0.391 0.285,-0.409 0.282,-0.427C0.279,-0.445 0.276,-0.46 0.273,-0.473L0.265,-0.473C0.266,-0.456 0.266,-0.435 0.267,-0.41C0.268,-0.385 0.268,-0.358 0.269,-0.33C0.269,-0.302 0.269,-0.275 0.269,-0.248L0.269,-0L0.074,-0Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,96.291667,0)">
+                    <path d="M0.01,-0L0.261,-0.688L0.518,-0.688L0.769,-0L0.535,-0L0.506,-0.097L0.265,-0.097L0.236,-0L0.01,-0ZM0.311,-0.251L0.461,-0.251L0.428,-0.361C0.425,-0.369 0.422,-0.379 0.419,-0.39C0.416,-0.401 0.412,-0.413 0.409,-0.426C0.406,-0.439 0.402,-0.451 0.399,-0.464C0.396,-0.476 0.393,-0.487 0.39,-0.496L0.382,-0.496C0.379,-0.484 0.376,-0.47 0.371,-0.455C0.367,-0.44 0.363,-0.424 0.358,-0.408C0.353,-0.391 0.349,-0.376 0.344,-0.361L0.311,-0.251Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(83.333333,0,0,83.333333,161.125,0)">
+                    <path d="M0.074,-0L0.074,-0.688L0.262,-0.688L0.476,-0.441C0.482,-0.434 0.49,-0.425 0.5,-0.412C0.51,-0.399 0.52,-0.387 0.53,-0.373C0.541,-0.36 0.549,-0.35 0.554,-0.342L0.559,-0.344C0.558,-0.363 0.558,-0.381 0.558,-0.4L0.558,-0.688L0.759,-0.688L0.759,-0L0.572,-0L0.331,-0.275C0.32,-0.288 0.31,-0.3 0.302,-0.311C0.294,-0.323 0.286,-0.333 0.279,-0.343L0.274,-0.341C0.275,-0.328 0.275,-0.316 0.275,-0.303L0.275,-0L0.074,-0Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+            </g>
+            <g transform="matrix(0.034717,0,0,0.034717,517.009463,8414.045647)">
+                <g transform="matrix(0.782218,0,0,0.782218,662.390476,0.003911)">
+                    <path d="M1312.53,1476.02L1312.53,1068.49C1315.37,983.74 1214.04,924.93 1141.93,969.99C1002.63,1049.98 175.24,1528.41 56.92,1596.34C21.84,1616.6 0.05,1654.34 0.05,1694.85L0,2321.33C0,2361.83 21.79,2399.58 56.88,2419.84L1331.46,3155.69C1366.53,3175.93 1410.12,3175.93 1445.19,3155.69L1798.12,2951.95C1833.73,2931.39 1854.99,2894.56 1854.99,2853.44C1854.99,2812.63 1834.03,2776.06 1798.89,2755.42L902.7,2237.97C765.25,2164.13 727.85,1966.85 824.23,1846.79C862.18,1781.41 1192.18,1618.39 1255.66,1574.52C1290.74,1554.27 1312.54,1516.53 1312.54,1476.02L1312.53,1476.02Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(0.782218,0,0,0.782218,662.390476,0.003911)">
+                    <path d="M1798.15,1909.64L1445.23,1705.87C1410.15,1685.61 1366.56,1685.62 1331.48,1705.87L978.52,1909.66C967.4,1916.08 957.68,1924.09 949.57,1933.32C903.12,1983.86 917.01,2073.8 978.54,2106.63C1117.34,2187.19 1945.58,2664.69 2063.49,2733.11C2098.56,2753.35 2142.14,2753.36 2177.23,2733.11L2719.8,2419.91C2754.88,2399.65 2776.68,2361.91 2776.67,2321.4L2776.65,849.65C2776.65,809.15 2754.86,771.4 2719.79,751.15L2366.88,547.38C2294.81,502.66 2193.59,560.72 2196.27,645.65L2196.27,1679.81C2202.68,1877.79 1967.38,2014.58 1798.15,1909.65L1798.15,1909.64Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+                <g transform="matrix(0.782218,0,0,0.782218,662.390476,0.003911)">
+                    <path d="M1521.06,1574.53L1874.03,1778.3C1909.76,1798.96 1952.45,1798.73 1987.72,1778.3C2023.33,1757.74 2044.6,1720.92 2044.6,1679.8C2044.96,1519.43 2044.37,563.19 2044.63,426.95C2044.63,386.45 2022.84,348.7 1987.78,328.46L1445.24,15.19C1410.16,-5.07 1366.57,-5.07 1331.49,15.19L56.94,751.11C21.86,771.37 0.07,809.11 0.07,849.61L0.07,1257.13C-2.63,1341.29 97.06,1400 169.23,1356.4L1066.1,838.62C1149.2,790.65 1248.4,790.65 1331.48,838.62C1414.57,886.59 1464.18,972.51 1464.18,1068.45L1464.18,1476.01C1464.17,1516.51 1485.97,1554.26 1521.05,1574.51L1521.06,1574.53Z" style="fill:rgb(255,252,239);fill-rule:nonzero;"></path>
+                </g>
+            </g>
+            <g transform="matrix(0.529355,0,0,0.529355,1372.373825,8455.686724)">
+                <g transform="matrix(41.666667,0,0,41.666667,-414.125,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-384.041667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-356.25,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-328.5,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-300.708333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-282.208333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-254.416667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-235.916667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-217.416667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-189.625,0)">
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-182.125,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-154.333333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-141.041667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-113.25,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-94.75,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-76.25,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-58.166667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-30.375,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,-2.583333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,10.708333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,38.5,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,66.291667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,94.083333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,107.958333,0)">
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,115.458333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,128.75,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,142.041667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,169.833333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,197.625,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,210.916667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,238.708333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,252,0)">
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,259.5,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,287.291667,0)">
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,294.791667,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,322.583333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,335.875,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,354.375,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,372.458333,0)">
+                    
+                </g>
+                <g transform="matrix(41.666667,0,0,41.666667,400.25,0)">
+                    
+                </g>
+            </g>
+            <g transform="matrix(1,0,0,1,543.396918,5623.205919)">
+                <g transform="matrix(-0.001665,0.058747,-0.058747,-0.001665,1004.701149,3964.088619)">
+                    
+                </g>
+                <g transform="matrix(-0.001665,0.058747,-0.058747,-0.001665,974.939472,3964.088619)">
+                    
+                </g>
+                <g transform="matrix(-0.001665,0.058747,-0.058747,-0.001665,942.333149,3964.088619)">
+                    
+                </g>
+            </g>
+        </g>
+    </g>
+</svg></div>
+
+  <!-- verifica età (mese e anno, come sul sito) -->
+  <section id="eta" class="eta" hidden>
+    <div class="mono" style="color: var(--orange); font-size: 12px">PRIMA DI ENTRARE</div>
+    <div class="q">QUANDO<br>SEI NATO?</div>
+    <p class="lead" style="color: var(--sand); font-size: 17px">Questa pagina è riservata ai maggiorenni.</p>
+    <div class="sel">
+      <label class="mono">MESE<select id="mese"><option value="">Mese</option></select></label>
+      <label class="mono">ANNO<select id="anno"><option value="">Anno</option></select></label>
+    </div>
+    <button class="btn or" id="entra" type="button">ENTRA</button>
+    <p class="err" id="etaErr" hidden></p>
+    <p class="small">Vapeman è un negozio di sigarette elettroniche, liquidi e accessori. La vendita è vietata ai minori di 18 anni.</p>
+  </section>
+
+  <main id="pagina" hidden>
+    <div class="hero">
+      <div class="mono" style="font-size: 12px" id="arrivi" hidden></div>
+      <h1>CAMBIARE<br>ABITUDINE<br>SI PUÒ.</h1>
+      <p class="lead">Ti spieghiamo come, con calma e senza obbligo di acquisto.</p>
+    </div>
+    <div class="body">
+      <div class="card">
+        <div class="mono" style="font-size: 12px">MOSTRA QUESTA SCHERMATA IN CASSA</div>
+        <div class="t" id="nome">VAPEMAN, VIA MEDEGHINO 39</div>
+        <div class="perk" id="perk" hidden><span class="mono" style="font-size: 11px">TI ASPETTA</span><b id="vantaggio"></b></div>
+        <div id="okBox" hidden style="display: flex; align-items: center; gap: 10px">
+          <div class="check" style="width: 36px; height: 36px; border-radius: 18px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#231912" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <span class="mono" style="font-size: 13px" id="okRiga"></span>
+        </div>
+        <button class="staff mono" id="apriStaff" type="button">CONFERMA VISITA (NEGOZIO)</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <h2>COSA FACCIAMO</h2>
+        <div class="row"><span class="n mono">01</span><p>Ti spieghiamo come funzionano le alternative alla sigaretta.</p></div>
+        <div class="row"><span class="n mono">02</span><p>Ti aiutiamo a scegliere quella giusta per te, senza fretta.</p></div>
+        <div class="row"><span class="n mono">03</span><p>Ti seguiamo anche dopo, con l'assistenza in negozio.</p></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px">
+        <h2>DOVE SIAMO</h2>
+        <div class="dove">
+          <div class="ind">VIA MEDEGHINO 39,<br>MILANO</div>
+          <div class="mono" style="font-size: 14px; color: var(--sand)">LUN-SAB 7:30-12:00 · 13:00-20:00<br>DOMENICA CHIUSO</div>
+          <a class="maps" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=Vapeman+Via+Medeghino+39+Milano">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#231912" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            APRI IN GOOGLE MAPS</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="pill">SOLO MAGGIORENNI</span><span class="mono" style="font-size: 12px; color: var(--sand)">vapemanitalia.it</span></div>
+  </main>
+
+  <!-- riservato al negozio: PIN -->
+  <div id="staff" hidden>
+    <div class="dim" id="chiudiDim"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="staffT">
+      <div class="mono" style="font-size: 12px; color: var(--brick)">RISERVATO AL NEGOZIO</div>
+      <div class="t" id="staffT">CONFERMA<br>LA VISITA</div>
+      <div class="mono" style="font-size: 13px; color: var(--bark)" id="staffRif"></div>
+      <label class="mono" style="font-size: 11px; color: var(--bark); display: flex; flex-direction: column; gap: 6px">PIN DEL NEGOZIO
+        <input class="pin mono" id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label>
+      <p class="err" id="pinErr" style="color: var(--brick)" hidden></p>
+      <button class="btn bl" id="conferma" type="button">CONFERMA</button>
+      <button class="link mono" id="annulla" type="button">ANNULLA</button>
+    </div>
+  </div>
+</div>
+<script>
+  var APP = 'https://script.google.com/macros/s/AKfycbz4Y04B4DUuM9_msWe8-5J52-VRGKX5RCsoSVQCuXDPzBoBQCYccg_Kq3XYVtEl9C6z/exec';
+  var $ = function (id) { return document.getElementById(id); };
+  var oggi = new Date();
+  var q = location.search.replace(/^\?/, '');
+  var mq = q.match(/(?:^|&)s=([^&]*)/);
+  var COD = (mq ? mq[1] : q.split('&')[0]).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 30);
+  var DATI = { codice: COD, nome: '', vantaggio: '', id: '' };
+  for (var k = 0; k < 6; k++) DATI.id += '0123456789ABCDEF'.charAt(Math.floor(Math.random() * 16));
+  function api(dati) {
+    return fetch(APP, { method: 'POST', body: JSON.stringify(dati) }).then(function (r) { return r.json(); });
+  }
+  function mostraDati() {
+    if (DATI.nome) { $('arrivi').textContent = 'ARRIVI DA ' + DATI.nome; $('arrivi').hidden = false; $('nome').textContent = DATI.nome; }
+    if (DATI.vantaggio) { $('vantaggio').textContent = DATI.vantaggio.toUpperCase(); $('perk').hidden = false; }
+    $('staffRif').textContent = (DATI.nome ? 'STAND ' + DATI.nome : 'VAPEMAN') + ' · N. ' + DATI.id;
+  }
+  mostraDati();
+  /* apertura: si segna in "Aperture"; "prima volta" = primo QR di questo stand aperto da questo telefono */
+  var prima = true;
+  try { prima = !localStorage.getItem('vm_ap_' + COD); localStorage.setItem('vm_ap_' + COD, '1'); } catch (e) {}
+  api({ azione: 'apri', codice: COD, prima: prima }).then(function (r) {
+    if (!r || !r.ok) return;
+    DATI.codice = r.codice || ''; DATI.nome = r.nome || ''; DATI.vantaggio = r.vantaggio || '';
+    mostraDati();
+  }).catch(function () {});
+
+  /* età: ricordata 30 giorni sul telefono (anche su quello del negozio) */
+  function etaOk() { try { var t = Number(localStorage.getItem('vm_eta') || 0); return Date.now() - t < 30 * 86400000; } catch (e) { return false; } }
+  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; }
+  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  MESI.forEach(function (m, i) { var o = document.createElement('option'); o.value = i + 1; o.textContent = m; $('mese').appendChild(o); });
+  for (var y = oggi.getFullYear() - 10; y >= oggi.getFullYear() - 100; y--) { var o = document.createElement('option'); o.value = y; o.textContent = y; $('anno').appendChild(o); }
+  if (etaOk()) mostraPagina(); else $('eta').hidden = false;
+  $('entra').addEventListener('click', function () {
+    var m = Number($('mese').value), a = Number($('anno').value);
+    if (!m || !a) { $('etaErr').textContent = 'Scegli mese e anno di nascita.'; $('etaErr').hidden = false; return; }
+    var mesi = (oggi.getFullYear() - a) * 12 + (oggi.getMonth() + 1 - m);
+    if (mesi < 18 * 12) { $('etaErr').textContent = 'Ci dispiace: questa pagina è riservata ai maggiorenni.'; $('etaErr').hidden = false; return; }
+    try { localStorage.setItem('vm_eta', String(Date.now())); } catch (e) {}
+    mostraPagina();
+  });
+
+  /* conferma in cassa */
+  function apri() { $('staff').hidden = false; $('pinErr').hidden = true; $('pin').value = ''; $('pin').focus(); }
+  function chiudi() { $('staff').hidden = true; }
+  $('apriStaff').addEventListener('click', apri);
+  $('annulla').addEventListener('click', chiudi);
+  $('chiudiDim').addEventListener('click', chiudi);
+  $('conferma').addEventListener('click', function () {
+    var b = $('conferma'); b.disabled = true; b.textContent = 'UN ATTIMO...';
+    api({ azione: 'conferma', id: DATI.id, codice: DATI.codice, pin: $('pin').value }).then(function (r) {
+      b.disabled = false; b.textContent = 'CONFERMA';
+      if (!r.ok) { $('pinErr').textContent = r.msg || 'Errore, riprova.'; $('pinErr').hidden = false; return; }
+      chiudi();
+      $('okRiga').textContent = r.gia ? 'VISITA GIÀ REGISTRATA' : 'VISITA REGISTRATA' + (r.ora ? ' · ORE ' + r.ora : '');
+      $('okBox').hidden = false; $('apriStaff').hidden = true;
+    }).catch(function () { b.disabled = false; b.textContent = 'CONFERMA'; $('pinErr').textContent = 'Connessione assente, riprova.'; $('pinErr').hidden = false; });
+  });
+</script>
 </body>
 </html>
