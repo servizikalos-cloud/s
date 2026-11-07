@@ -383,7 +383,7 @@
     }
     function gratta(p) {
       mosse++;
-      g.globalCompositeOperation = 'destination-out'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = 38;
+      g.globalCompositeOperation = 'destination-out'; g.strokeStyle = '#000'; g.globalAlpha = 1; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = 38;
       g.beginPath(); g.moveTo(ultimo ? ultimo.x : p.x - 0.1, ultimo ? ultimo.y : p.y); g.lineTo(p.x, p.y); g.stroke();
       ultimo = p;
       if (mosse % 6 === 0) controlla();
