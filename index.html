@@ -12,7 +12,7 @@
   html, body { margin: 0; background: var(--black); color: var(--cream); font-family: 'Archivo', 'Arial Black', sans-serif; }
   .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow: hidden; }
   .mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-weight: 600; letter-spacing: .06em; line-height: 1.35; }
-  .head { position: relative; height: 78px; overflow: hidden; background: var(--orange); }
+  .head { position: relative; height: 78px; overflow: hidden; background: transparent; }
   .head svg { position: absolute; left: 0; top: 0; }
   .hero { background: var(--orange); color: var(--black); padding: 6px 24px 30px; display: flex; flex-direction: column; gap: 12px; }
   h1 { margin: 0; font-size: 38px; font-weight: 900; line-height: 1; }
@@ -22,6 +22,11 @@
   .card .t { font-size: 30px; font-weight: 900; line-height: 1.05; }
   .perk { background: var(--orange); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
   .perk b { font-size: 20px; font-weight: 900; line-height: 1.1; }
+  .gratta { position: relative; border-radius: 12px; overflow: hidden; }
+  .gratta .perk { min-height: 96px; justify-content: center; align-items: center; text-align: center; }
+  .gratta .perk b { font-size: 28px; }
+  #grattaCanvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; transition: opacity .45s; }
+  .scopri { align-self: center; min-height: 32px; margin-top: -8px; font-size: 11px; }
   .staff { align-self: flex-start; min-height: 44px; padding: 0 16px; border: 2px solid var(--black); border-radius: 10px; background: var(--cream); color: var(--black); font-size: 12px; cursor: pointer; }
   .btn { min-height: 56px; border: none; border-radius: 12px; font-family: 'Archivo', sans-serif; font-size: 18px; font-weight: 900; cursor: pointer; width: 100%; }
   .btn.or { background: var(--orange); color: var(--black); }
@@ -265,7 +270,11 @@
         <div class="mono" style="font-size: 12px">QUANDO PASSI DA VAPEMAN</div>
         <div class="t">MOSTRA QUESTA SCHERMATA IN CASSA</div>
         <p class="dove-mini">Vapeman, Via Medeghino 39, Milano</p>
-        <div class="perk" id="perk" hidden><span class="mono" style="font-size: 11px">TI ASPETTA</span><b id="vantaggio"></b></div>
+        <div class="gratta" id="gratta" hidden>
+          <div class="perk"><span class="mono" style="font-size: 11px">TI ASPETTA</span><b id="vantaggio"></b></div>
+          <canvas id="grattaCanvas" aria-hidden="true"></canvas>
+        </div>
+        <button class="link mono scopri" id="scopri" type="button" hidden>NON RIESCI A GRATTARE? TOCCA QUI</button>
         <div id="okBox" hidden style="display: flex; align-items: center; gap: 10px">
           <div class="check" style="width: 36px; height: 36px; border-radius: 18px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#231912" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
           <span class="mono" style="font-size: 13px" id="okRiga"></span>
@@ -335,9 +344,62 @@
   function api(dati) {
     return fetch(APP, { method: 'POST', body: JSON.stringify(dati) }).then(function (r) { return r.json(); });
   }
+  /* sconto da grattare: si gratta col dito (o col mouse); a metà si scopre tutto. Resta scoperto su quel telefono. */
+  var GK = 'vm_gratta_' + (COD || 'x'), grattaPronto = false;
+  function scopri() {
+    var c = $('grattaCanvas'); c.style.opacity = '0'; c.style.pointerEvents = 'none'; $('scopri').hidden = true;
+    try { localStorage.setItem(GK, '1'); } catch (e) {}
+    setTimeout(function () { c.hidden = true; }, 500);
+  }
+  function preparaGratta() {
+    if (grattaPronto) return;
+    var c = $('grattaCanvas'), box = $('gratta');
+    var gia = false; try { gia = localStorage.getItem(GK) === '1'; } catch (e) {}
+    if (gia) { grattaPronto = true; c.hidden = true; return; }
+    var r = box.getBoundingClientRect(); if (!r.width) return;
+    grattaPronto = true; $('scopri').hidden = false;
+    var dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+    var g = c.getContext('2d'); g.scale(dpr, dpr);
+    var mosse = 0;
+    function disegna() {
+      if (mosse) return;
+      g.globalCompositeOperation = 'source-over';
+      g.fillStyle = '#231912'; g.fillRect(0, 0, r.width, r.height);
+      g.strokeStyle = 'rgba(235,137,44,.25)'; g.lineWidth = 9;
+      for (var x = -r.height; x < r.width + r.height; x += 24) { g.beginPath(); g.moveTo(x, r.height); g.lineTo(x + r.height, 0); g.stroke(); }
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = '#FFFCEF'; g.font = '900 26px Archivo, "Arial Black", sans-serif'; g.fillText('GRATTA QUI', r.width / 2, r.height / 2 - 10);
+      g.fillStyle = '#F4D8A8'; g.font = '600 11px "IBM Plex Mono", "Courier New", monospace'; g.fillText('E SCOPRI COSA TI ASPETTA', r.width / 2, r.height / 2 + 16);
+    }
+    disegna();
+    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('900 26px Archivo'), document.fonts.load('600 11px "IBM Plex Mono"')]).then(disegna, function () {});
+    var giu = false, ultimo = null;
+    function punto(e) { var b = c.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+    function controlla() {
+      var d = g.getImageData(0, 0, c.width, c.height).data, vuoti = 0, tot = 0;
+      for (var i = 3; i < d.length; i += 4 * 23) { tot++; if (d[i] < 40) vuoti++; }
+      if (tot && vuoti / tot > 0.45) scopri();
+    }
+    function gratta(p) {
+      mosse++;
+      g.globalCompositeOperation = 'destination-out'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = 38;
+      g.beginPath(); g.moveTo(ultimo ? ultimo.x : p.x - 0.1, ultimo ? ultimo.y : p.y); g.lineTo(p.x, p.y); g.stroke();
+      ultimo = p;
+      if (mosse % 6 === 0) controlla();
+    }
+    c.addEventListener('pointerdown', function (e) { e.preventDefault(); giu = true; ultimo = null; try { c.setPointerCapture(e.pointerId); } catch (x) {} gratta(punto(e)); });
+    c.addEventListener('pointermove', function (e) { if (giu) { e.preventDefault(); gratta(punto(e)); } });
+    ['pointerup', 'pointercancel'].forEach(function (tipo) { c.addEventListener(tipo, function () { if (giu) controlla(); giu = false; ultimo = null; }); });
+  }
+  $('scopri').addEventListener('click', scopri);
+
   function mostraDati() {
     if (DATI.nome) { $('arrivi').textContent = 'HAI TROVATO IL QR DA ' + DATI.nome; $('arrivi').hidden = false; }
-    if (DATI.vantaggio) { $('vantaggio').textContent = DATI.vantaggio.toUpperCase(); $('perk').hidden = false; }
+    if (DATI.vantaggio) {
+      $('vantaggio').textContent = DATI.vantaggio.toUpperCase(); $('gratta').hidden = false;
+      if (!$('pagina').hidden) requestAnimationFrame(preparaGratta);
+    }
     $('staffRif').textContent = (DATI.nome ? 'STAND ' + DATI.nome : 'VAPEMAN') + ' · N. ' + DATI.id;
   }
   mostraDati();
@@ -352,7 +414,7 @@
 
   /* età: ricordata 30 giorni sul telefono (anche su quello del negozio) */
   function etaOk() { try { var t = Number(localStorage.getItem('vm_eta') || 0); return Date.now() - t < 30 * 86400000; } catch (e) { return false; } }
-  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; }
+  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; if (!$('gratta').hidden) requestAnimationFrame(preparaGratta); }
   var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
   MESI.forEach(function (m, i) { var o = document.createElement('option'); o.value = i + 1; o.textContent = m; $('mese').appendChild(o); });
   for (var y = oggi.getFullYear() - 10; y >= oggi.getFullYear() - 100; y--) { var o = document.createElement('option'); o.value = y; o.textContent = y; $('anno').appendChild(o); }
@@ -391,6 +453,7 @@
       chiudi();
       $('okRiga').textContent = r.gia ? 'VISITA GIÀ REGISTRATA' : 'VISITA REGISTRATA' + (r.ora ? ' · ORE ' + r.ora : '');
       $('okBox').hidden = false; $('apriStaff').hidden = true;
+      if (!$('gratta').hidden && !$('grattaCanvas').hidden) scopri();
     }).catch(function () { b.disabled = false; b.textContent = 'CONFERMA'; $('pinErr').textContent = 'Connessione assente, riprova.'; $('pinErr').hidden = false; });
   });
 </script>
