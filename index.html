@@ -13,6 +13,7 @@
   .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow: hidden; }
   .mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-weight: 600; letter-spacing: .06em; line-height: 1.35; }
   .head { position: relative; height: 78px; overflow: hidden; background: transparent; }
+  .head.arancio { background: var(--orange); } /* nella pagina: stesso colore del blocco sotto, nessuna banda */
   .head svg { position: absolute; left: 0; top: 0; }
   .hero { background: var(--orange); color: var(--black); padding: 6px 24px 30px; display: flex; flex-direction: column; gap: 12px; }
   h1 { margin: 0; font-size: 38px; font-weight: 900; line-height: 1; }
@@ -414,7 +415,7 @@
 
   /* età: ricordata 30 giorni sul telefono (anche su quello del negozio) */
   function etaOk() { try { var t = Number(localStorage.getItem('vm_eta') || 0); return Date.now() - t < 30 * 86400000; } catch (e) { return false; } }
-  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; if (!$('gratta').hidden) requestAnimationFrame(preparaGratta); }
+  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; document.querySelector('.head').classList.add('arancio'); if (!$('gratta').hidden) requestAnimationFrame(preparaGratta); }
   var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
   MESI.forEach(function (m, i) { var o = document.createElement('option'); o.value = i + 1; o.textContent = m; $('mese').appendChild(o); });
   for (var y = oggi.getFullYear() - 10; y >= oggi.getFullYear() - 100; y--) { var o = document.createElement('option'); o.value = y; o.textContent = y; $('anno').appendChild(o); }
