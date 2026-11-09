@@ -45,10 +45,6 @@
   .maps { cursor: pointer; border: none; width: 100%; font-family: 'Archivo', sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; background: var(--orange); color: var(--black); border-radius: 12px; font-size: 16px; font-weight: 900; text-decoration: none; }
   .foot { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 30px; }
   .pill { background: var(--orange); color: var(--black); font-size: 13px; font-weight: 900; padding: 7px 14px; border-radius: 6px; }
-  .eta { padding: 56px 24px 30px; display: flex; flex-direction: column; gap: 22px; }
-  .eta .q { font-size: 36px; font-weight: 900; line-height: 1.02; }
-  .sel { display: flex; gap: 12px; }
-  .sel label { flex: 1; display: flex; flex-direction: column; gap: 6px; color: var(--sand); font-size: 11px; }
   select { height: 52px; border: none; border-radius: 12px; background: var(--bark); color: var(--cream); font-family: 'Archivo', sans-serif; font-size: 17px; font-weight: 500; padding: 0 14px; width: 100%; }
   .small { font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--sand); margin: 0; }
   .err { color: var(--sand); font-size: 15px; font-weight: 500; margin: 0; }
@@ -63,7 +59,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="head"><svg role="img" aria-label="Vapeman" width="640" height="800" viewBox="0 0 1080 1350" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <div class="head arancio"><svg role="img" aria-label="Vapeman" width="640" height="800" viewBox="0 0 1080 1350" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
     <g transform="matrix(1,0,0,1,-526,-8400)">
         <rect id="Artboard24" x="526" y="8400" width="1080" height="1350" style="fill:none;"></rect>
         <clipPath id="_clip1">
@@ -246,21 +242,8 @@
     </g>
 </svg></div>
 
-  <!-- verifica età (mese e anno, come sul sito) -->
-  <section id="eta" class="eta" hidden>
-    <div class="mono" style="color: var(--orange); font-size: 12px">PRIMA DI ENTRARE</div>
-    <div class="q">QUANDO<br>SEI NATO?</div>
-    <p class="lead" style="color: var(--sand); font-size: 17px">Questa pagina è riservata ai maggiorenni.</p>
-    <div class="sel">
-      <label class="mono">MESE<select id="mese"><option value="">Mese</option></select></label>
-      <label class="mono">ANNO<select id="anno"><option value="">Anno</option></select></label>
-    </div>
-    <button class="btn or" id="entra" type="button">ENTRA</button>
-    <p class="err" id="etaErr" hidden></p>
-    <p class="small">Vapeman è un negozio di sigarette elettroniche, liquidi e accessori. La vendita è vietata ai minori di 18 anni.</p>
-  </section>
 
-  <main id="pagina" hidden>
+  <main id="pagina">
     <div class="hero">
       <div class="mono" style="font-size: 12px" id="arrivi" hidden></div>
       <h1>CAMBIARE<br>ABITUDINE<br>SI PUÒ.</h1>
@@ -412,22 +395,6 @@
     DATI.codice = r.codice || ''; DATI.nome = r.nome || ''; DATI.vantaggio = r.vantaggio || '';
     mostraDati();
   }).catch(function () {});
-
-  /* età: ricordata 30 giorni sul telefono (anche su quello del negozio) */
-  function etaOk() { try { var t = Number(localStorage.getItem('vm_eta') || 0); return Date.now() - t < 30 * 86400000; } catch (e) { return false; } }
-  function mostraPagina() { $('eta').hidden = true; $('pagina').hidden = false; document.querySelector('.head').classList.add('arancio'); if (!$('gratta').hidden) requestAnimationFrame(preparaGratta); }
-  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  MESI.forEach(function (m, i) { var o = document.createElement('option'); o.value = i + 1; o.textContent = m; $('mese').appendChild(o); });
-  for (var y = oggi.getFullYear() - 10; y >= oggi.getFullYear() - 100; y--) { var o = document.createElement('option'); o.value = y; o.textContent = y; $('anno').appendChild(o); }
-  if (etaOk()) mostraPagina(); else $('eta').hidden = false;
-  $('entra').addEventListener('click', function () {
-    var m = Number($('mese').value), a = Number($('anno').value);
-    if (!m || !a) { $('etaErr').textContent = 'Scegli mese e anno di nascita.'; $('etaErr').hidden = false; return; }
-    var mesi = (oggi.getFullYear() - a) * 12 + (oggi.getMonth() + 1 - m);
-    if (mesi < 18 * 12) { $('etaErr').textContent = 'Ci dispiace: questa pagina è riservata ai maggiorenni.'; $('etaErr').hidden = false; return; }
-    try { localStorage.setItem('vm_eta', String(Date.now())); } catch (e) {}
-    mostraPagina();
-  });
 
   /* come arrivare: su Android "Scegli sul telefono" apre la scelta delle app; su iPhone e Mac c'è anche Mappe di Apple */
   var ua = navigator.userAgent || '';
