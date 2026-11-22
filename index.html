@@ -387,10 +387,25 @@
     $('staffRif').textContent = (DATI.nome ? 'STAND ' + DATI.nome : 'VAPEMAN') + ' · N. ' + DATI.id;
   }
   mostraDati();
+  /* tipo di telefono e di app che apre il QR (es. "iPhone · Safari", "Android · Instagram"), senza dati personali:
+     serve a capire se più «prima volta» vengono dallo stesso telefono aperto in app diverse (22/11/2026) */
+  function dispositivo(memoria) {
+    var u = navigator.userAgent || '';
+    var so = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1) ? 'iPad'
+      : /Android/.test(u) ? 'Android' : /Macintosh/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'Altro';
+    var app = /Instagram/.test(u) ? 'Instagram' : /FBAN|FBAV|FB_IAB|FBIOS/.test(u) ? 'Facebook'
+      : /WhatsApp/.test(u) ? 'WhatsApp' : /musical_ly|BytedanceWebview|TikTok/.test(u) ? 'TikTok'
+      : /Telegram/.test(u) ? 'Telegram' : /Snapchat/.test(u) ? 'Snapchat' : /GSA\//.test(u) ? 'app Google'
+      : /SamsungBrowser/.test(u) ? 'Samsung Internet' : /EdgiOS|EdgA|Edg\//.test(u) ? 'Edge'
+      : /OPR\/|OPiOS/.test(u) ? 'Opera' : /FxiOS|Firefox/.test(u) ? 'Firefox'
+      : /; wv\)/.test(u) ? 'app (WebView)' : /CriOS|Chrome/.test(u) ? 'Chrome'
+      : /Safari/.test(u) ? 'Safari' : 'app (WebView)';
+    return so + ' · ' + app + (memoria ? '' : ' · senza memoria');
+  }
   /* apertura: si segna in "Aperture"; "prima volta" = primo QR di questo stand aperto da questo telefono */
-  var prima = true;
-  try { prima = !localStorage.getItem('vm_ap_' + COD); localStorage.setItem('vm_ap_' + COD, '1'); } catch (e) {}
-  api({ azione: 'apri', codice: COD, prima: prima }).then(function (r) {
+  var prima = true, memoria = true;
+  try { prima = !localStorage.getItem('vm_ap_' + COD); localStorage.setItem('vm_ap_' + COD, '1'); } catch (e) { memoria = false; }
+  api({ azione: 'apri', codice: COD, prima: prima, disp: dispositivo(memoria) }).then(function (r) {
     if (!r || !r.ok) return;
     DATI.codice = r.codice || ''; DATI.nome = r.nome || ''; DATI.vantaggio = r.vantaggio || '';
     mostraDati();
